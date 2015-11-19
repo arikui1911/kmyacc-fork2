@@ -1,5 +1,6 @@
 #ifndef _token_h
 #define _token_h
+
 /* return values of function gettoken */
 #define	NAME		'a'
 #define	NUMBER		'0'
@@ -30,4 +31,5 @@ extern int raw_gettoken(void);
 extern int gettoken(void);
 extern void ungettok(void);
 extern int peektoken(void);
+
 #endif

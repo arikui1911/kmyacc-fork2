@@ -1,15 +1,19 @@
 #ifndef _misc_h
 #define _misc_h
+
 typedef struct list {
-  struct list *next;
-  void *elem;
+    struct list *next;
+    void *elem;
 } List;
+
 typedef struct flexstr Flexstr;
+
 struct flexstr {
-  int alloc_size;
-  int length;
-  char *body;
+    int alloc_size;
+    int length;
+    char *body;
 };
+
 extern char *extension(char *path);
 extern void error1(char *fmt, char *x);
 extern void error(char *fmt);
@@ -26,4 +30,5 @@ extern void *talloc(unsigned s);
 extern void release(void);
 extern long bytes_allocated(void);
 extern void show_mem_usage(void);
+
 #endif
