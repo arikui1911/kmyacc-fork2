@@ -1,5 +1,6 @@
 #ifndef _compress_h
 #define _compress_h
+
 #define YYUNEXPECTED 32767
 #define YYDEFAULT -32766
 extern short *yytranslate;
@@ -21,4 +22,5 @@ extern short *yylen;
 extern short *ctermindex;
 extern int convert_sym(int sym);
 extern void makeup_table2(void);
+
 #endif

@@ -24,4 +24,5 @@ extern void parser_end_copying(void);
 extern char *parser_dollar(int dollartype, int nth, int len, char *typename);
 extern void parser_generate(void);
 extern void parser_close(void);
+
 #endif

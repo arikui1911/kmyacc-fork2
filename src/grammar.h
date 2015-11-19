@@ -20,24 +20,24 @@ typedef short Gsym;
 #define NB MAXTERM
 
 typedef struct symbol {
-  struct symbol *next;
-  struct symbol *type;
-  short value;
-  Gsym code;
-  uchar prec;
-  uchar assoc;
+    struct symbol *next;
+    struct symbol *type;
+    short value;
+    Gsym code;
+    uchar prec;
+    uchar assoc;
 #define F_EMPTY 0x80
 #define F_CONTEXT 0x40
-  char *name;
+    char *name;
 } Symbol;
 
 typedef struct production {
-  short link; /* next prod# which has same LHS */
-  uchar assoc;
-  uchar prec;
-  int pos;
-  char *action;
-  Gsym body[1];
+    short link; /* next prod# which has same LHS */
+    uchar assoc;
+    uchar prec;
+    int pos;
+    char *action;
+    Gsym body[1];
 } Production;
 
 /* Return non-zero if grammar symbol s is a terminal */
@@ -54,4 +54,5 @@ extern bool pure_flag;
 extern int length(Gsym *p);
 extern void do_declaration(void);
 extern void do_grammar(void);
+
 #endif
