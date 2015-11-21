@@ -51,7 +51,7 @@ static int backch;
 
 global int get(){
     int c;
-        
+
     if (backed) {
         backed = NO;
         return backch;
@@ -82,7 +82,7 @@ Thash *hashtbl[NHASHROOT];
 /* Return string p's hash value */
 static unsigned hash(char *p){
     unsigned u;
-        
+
     u = 0;
     while (*p) {
         u = u * 257 + *p++;
@@ -94,7 +94,7 @@ static unsigned hash(char *p){
 /* Intern token s */
 global char *intern_token(char *s){
     Thash *p, **root;
-        
+
     root = hashtbl + (hash(s) % NHASHROOT);
     for (p = *root; p != NULL; p = p->next) {
         if (strcmp(p->body, s) == 0) return p->body;
