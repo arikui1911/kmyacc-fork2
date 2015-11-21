@@ -96,7 +96,7 @@ static char M_SYNTAX[] = "Syntax error near '%s'";
 /* Return a symbol which corresponds to string s */
 Symbol *intern(char *s){
     Symbol *p, **root;
-        
+
     root = hashtbl + (hash(s) % HASHSIZE);
     for (p = *root; p != NULL; p = p->next) {
         if (p->name == s) return (p);
@@ -120,7 +120,7 @@ int charval(char *s){
     int val;
     int c;
     int i;
-        
+
     if ((c = *s++) != '\\') return c;
     c = *s++;
     if (isoctal(c)) {
@@ -154,7 +154,7 @@ int charval(char *s){
 /* Return grammar id for string s, register if new */
 Gsym intern_gsym(char *s, bool term){
     Symbol *p;
-        
+
     p = intern(s);
     if (p->code != NILSYM) return (p->code);
     if (term || p->name[0] == '\'') {
@@ -185,11 +185,10 @@ Gsym intern_gsym(char *s, bool term){
 Gsym gen_nont(){
     static int n = 1;
     char buf[6];
-        
+
     sprintf(buf, "@%d", n++);
     return (intern_gsym(intern_token(buf), NO));
 }
-
 
 /* Read <typename> in %type/%token, etc.
  * return interned string between balanced <>.
@@ -247,7 +246,7 @@ void do_token(int tag){
     Symbol *type, *p;
     int precincr = 0;
     char t;
-        
+
     type = gettype();
     t = gettoken();
     while (isgsym(t)) {
@@ -286,7 +285,7 @@ void do_token(int tag){
 void do_type(){
     Symbol *type, *p;
     char t;
-        
+
     type = gettype();
     for (;;) {
         if ((t = gettoken()) == ',') continue;
@@ -510,7 +509,7 @@ global void do_grammar(){
     int pos;
     int i;
     int t;
-        
+
     r = alloc(sizeof(Production) + sizeof(Gsym) * 3);
     r->body[1] = start_prime;
     r->link = -1;
