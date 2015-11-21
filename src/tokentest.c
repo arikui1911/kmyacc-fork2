@@ -13,8 +13,7 @@ FILE *ifp;
 int lineno = 0;
 char *filename = "";
 
-int main()
-{
+int main(){
     int token;
 
     ifp = stdin;
