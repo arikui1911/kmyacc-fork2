@@ -108,7 +108,7 @@ private uchar (*follow)[(MAXTERM + NBITS - 1) / NBITS];
 bool orbits(uchar *d, uchar *s){
     bool changed;
     int i;
-        
+
     changed = NO;
     for (i = 0; i < nterms; i += NBITS) {
         if (*s & ~*d) {
@@ -135,7 +135,7 @@ Gsym next_elem(Gsym e, uchar *p){
 /* Dump set */
 void dump_set(uchar *set){
     Gsym x;
-        
+
     for (x = 0; x < nterms; x++) {
         if (tbit(set, x)) fprintf(vfp, "%s ", gsym[x]->name);
     }
@@ -144,7 +144,7 @@ void dump_set(uchar *set){
 /* Return production number of Item p */
 int item2pnum(Gsym *p){
     int i;
-        
+
     while (*--p != 0)
         ;
     for (i = 0; i < nprods; i++) {
@@ -156,7 +156,7 @@ int item2pnum(Gsym *p){
 /* Print Item s */
 void write_item(Item s){
     Item p;
-        
+
     p = s;
     while (*--s != 0)
         ;
@@ -491,7 +491,7 @@ void comp_kernels(){
 /* Compute FIRST set of sequence s into p */
 void comp_first(uchar *p, Gsym *s){
     Gsym g;
-        
+
     while ((g = *s++) != 0) {
         if (isterm(g)) {
             sbit(p, g);
@@ -505,7 +505,7 @@ void comp_first(uchar *p, Gsym *s){
 /* Return non-zero if grammar sequence s could be empty */
 bool seq_nullable(Gsym *s){
     Gsym g;
-        
+
     while ((g = *s++) != 0) {
         if (isterm(g) || !nullable[g - NB]) return (NO);
     }
@@ -518,7 +518,7 @@ void comp_follow(State *st){
     State **t;
     LR1 *x;
     bool changed;
-        
+
     for (t = st->shifts; *t; t++) {
         if (!isterm((*t)->thru)) {
             memset(p = follow[(*t)->thru - NB], 0, bytes_LA);
@@ -587,7 +587,7 @@ void comp_lookaheads(){
             }
         }
     } while (changed);
-        
+
     if (debug) {
         for (p = states; p != NULL; p = p->next) {
             fprintf(vfp, "state unknown:\n");
@@ -606,7 +606,7 @@ void comp_lookaheads(){
 
 int cmpprec(int pnum, Gsym x){
     int v;
-        
+
     if (gram[pnum]->assoc == A_UNDEF || (gsym[x]->assoc & A_MASK) == A_UNDEF) return (0);
     if ((v = (int)gsym[x]->prec - (int)gram[pnum]->prec) != 0) return (v);
     switch (gram[pnum]->assoc) {
@@ -647,7 +647,7 @@ void print_state(int st){
                     gsym[conf->symbol]->name);
         }
     }
-                        
+
     for (x = statev[st]->items; x != NULL; x = x->next) {
         write_item(x->item);
     }
@@ -796,7 +796,7 @@ void fill_reduce(){
                 nr++;
             }
         }
-	
+
         /* Decide default action */
         if (!tdefact) {
             tdefact = -1;
@@ -837,7 +837,7 @@ void fill_reduce(){
         nacts2 += nr;
         memcpy(p->reduce, tmpr, sizeof(tmpr[0]) * nr);
 
-#if 0	
+#if 0
         /* print states */
         if (vfp)
             print_state(i);
