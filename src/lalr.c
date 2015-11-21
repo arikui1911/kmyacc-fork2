@@ -151,6 +151,7 @@ int item2pnum(Gsym *p){
         if (gram[i]->body == p) return (i);
     }
     die("item2pnum(): can't happen");
+    return 0;
 }
 
 /* Print Item s */
@@ -617,6 +618,7 @@ int cmpprec(int pnum, Gsym x){
     case A_NON:		/* Non-associative, error */
         return (NON_ASSOC);
     }
+    return 0;
 }
 
 /* Return true if st is reduce-only state. */

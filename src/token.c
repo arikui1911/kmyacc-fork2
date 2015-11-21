@@ -284,6 +284,7 @@ global int raw_gettoken(){
 
  toolong:
     die("Too long token");
+    return 0;
 }
 
 global int gettoken(){

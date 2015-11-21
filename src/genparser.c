@@ -293,6 +293,7 @@ char *enough_type(short *p, int n){
     default:
         unsupported();
     }
+    return 0;
 }
 
 void print_array(short *p, int n, char *indent){
