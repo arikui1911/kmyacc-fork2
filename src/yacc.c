@@ -25,6 +25,9 @@ char *getenv();
 #include "genparser.h"
 #include "yacc.h"
 
+#include <assert.h>
+#include <string.h>
+
 
 global bool lflag;
 global bool tflag;
@@ -52,10 +55,10 @@ static char *progname = "kmyacc";
 
 
 /* Print usage of this program */
-void usage(){
+void usage(const char *program_name){
     fprintf(stderr, "KMyacc - parser generator ver 4.1.4\n");
     fprintf(stderr, "Copyright (C) 1987-1989,1992-1993,2005,2006  MORI Koichiro\n\n");
-    fprintf(stderr, "Usage: %s [-dvltani] [-b y] [-p yy] [-m model] [-L lang] [grammar.y\n", progname);
+    fprintf(stderr, "Usage: %s [-dvltani] [-b y] [-p yy] [-m model] [-L lang] [grammar.y\n", program_name);
 }
 
 
@@ -87,6 +90,116 @@ global void efclose(FILE *fp){
     }
 }
 
+typedef struct {
+    int fl_verbose;
+    int fl_defines;
+    char *filename_prefix;
+    char *host_lang;
+    char *parser_filename;
+    char *parser_prefix;
+} Options;
+
+// return < 0: error
+// return 0: no rest args
+// return > 0: first arg's index for argv
+static int parse_options(int argc, char *argv[], Options *o){
+    int i, j;
+    char *arg = NULL;
+    char arg_requirer = '\0';
+    int is_normal_arg;
+
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] == '\0') continue;   // empty
+        if (strcmp("--", argv[i]) == 0) {
+            i++;
+            break;
+        }
+
+        is_normal_arg = 0;
+        if (argv[i][0] != '-') {
+            is_normal_arg = 1;
+        } else if (strcmp("-", argv[i]) == 0) {
+            is_normal_arg = 1;
+        }
+
+        if (arg) {
+            int cur_arg_consumed = 0;
+            if (arg[0] == '\0') {
+                if (!is_normal_arg) break;
+                arg = argv[i];
+                cur_arg_consumed = 1;
+            }
+            switch (arg_requirer) {
+            case 'b':
+                o->filename_prefix = arg;
+                break;
+            case 'p':
+                o->parser_prefix = arg;
+                break;
+            case 'm':
+                o->parser_filename = arg;
+                break;
+            case 'L':
+                o->host_lang = arg;
+                break;
+            default:
+                assert(0);
+            }
+            arg = NULL;
+            if (cur_arg_consumed) continue;
+        }
+
+        if (is_normal_arg) break;
+
+        for (j = 1; argv[i][j] != '\0'; j++) {
+            switch (argv[i][j]) {
+            case 'd':
+                o->fl_defines = 1;
+                break;
+            case 'x':
+                debug = 1;
+                o->fl_verbose = 1;
+                break;
+            case 'v':
+                o->fl_verbose = 1;
+                break;
+            case 'l':
+                lflag = 1;
+                break;
+            case 't':
+                tflag = 1;
+                break;
+            case 'i':
+                iflag = 1;
+                nflag = 1;
+                break;
+            case 'n':
+                nflag = 1;
+                break;
+            case 'a':
+                aflag = 1;
+                break;
+            case 'b':
+            case 'p':
+            case 'm':
+            case 'L':
+                arg = &argv[i][j+1];
+                arg_requirer = argv[i][j];
+                break;
+            default:
+                fprintf(stderr, "%s: error: invalid argument `-%c'\n", argv[0], argv[i][j]);
+                return -1;
+            }
+        }
+    }
+    if (arg) {
+        fprintf(stderr, "%s: error: option `-%c' missing argument\n", argv[0], arg_requirer);
+        return -2;
+    }
+
+    if (i >= argc) return 0;
+    return i;
+}
 
 #ifdef MSDOS
 # define OUT_SUFFIX ".out"
@@ -95,138 +208,56 @@ global void efclose(FILE *fp){
 # define remove unlink
 #endif /* MSDOS */
 
-
 /* Entry point */
 int main(int argc, char *argv[]){
     char fn[MAXPATHLEN];
-    char *parserfn;
-    char *p;
+    char *parser_filename;
 
-    char *langname = NULL;
-    bool vflag = NO;
-    bool dflag = NO;
-    char *fnpref = NULL;
+    Options options;
+    int args_idx;
 
-    parserfn = getenv("KMYACCPAR");
+    char *host_lang = NULL;
+    bool fl_verbose = NO;
+    bool fl_defines = NO;
+    char *filename_prefix = NULL;
+
+    parser_filename = getenv("KMYACCPAR");
 
 #ifndef MSDOS
     progname = *argv;
 #endif /* !MSDOS */
 
-    while (++argv, --argc != 0 && argv[0][0] == '-') {
-        for (p = argv[0] + 1; *p; ) {
-            switch (*p++) {
-            case 'd':
-                dflag = YES;
-                break;
-            case 'x':
-                debug = YES;
-                /* fall thru */
-            case 'v':
-                vflag = YES;
-                break;
-            case 'l':
-                lflag = YES;
-                break;
-            case 't':
-                tflag = YES;
-                break;
-            case 'i':
-                iflag = YES;
-                /* fall thru */
-            case 'n':
-                nflag = YES;
-                break;
-            case 'L':
-                if (*p != '\0') {
-                    langname = p;
-                    p = "";
-                } else {
-                    if (--argc <= 0) goto boo;
-                    langname = *++argv;
-                }
-                break;
-            case 'b':
-                if (*p != '\0') {
-                    fnpref = p;
-                    p = "";
-                } else {
-                    if (--argc <= 0) goto boo;
-                    fnpref = *++argv;
-                }
-                break;
-            case 'p':
-                if (*p != '\0') {
-                    pspref = p;
-                    p = "";
-                } else {
-                    if (--argc <= 0) goto boo;
-                    pspref = *++argv;
-                }
-                break;
-            case 'm':
-                if (*p != '\0') {
-                    parserfn = p;
-                    p = "";
-                } else {
-                    if (--argc <= 0) goto boo;
-                    parserfn = *++argv;
-                }
-                break;
-            case 'a':
-                aflag = YES;
-                break;
-            default:
-            boo:
-                usage();
-                exit(1);
-            }
-        }
-    }
-    if (argc != 1) {
-        usage();
-        exit(1);
+    args_idx = parse_options(argc, argv, &options);
+    if (args_idx < 1 || (argc - args_idx) > 0) {
+        usage(argv[0]);
+        return -1;
     }
 
-    filename = argv[0];
+    filename = argv[args_idx];
 
-    if (langname) {
-        parser_set_language(langname);
+    if (host_lang) {
+        parser_set_language(host_lang);
     } else {
         parser_set_language_by_yaccext(extension(filename));
     }
 
     ifp = efopen(filename, "r");
-    outfilename = parser_outfilename(fnpref, filename); 
+    outfilename = parser_outfilename(filename_prefix, filename); 
     ofp = efopen(outfilename, "w");
-    if (dflag) {
-        char *header = parser_header_filename(fnpref, filename);
+    if (fl_defines) {
+        char *header = parser_header_filename(filename_prefix, filename);
         if (header != NULL) hfp = efopen(header, "w");
     }
-    if (parserfn == NULL) parserfn = parser_modelfilename(PARSERBASE);
+    if (parser_filename == NULL) parser_filename = parser_modelfilename(PARSERBASE);
 
-    /* Initialize parser generator */
-    parser_create(parserfn, tflag);
-    /* Read declaration section */
+    parser_create(parser_filename, tflag);
     do_declaration();
-    /* read grammar */
     do_grammar();
 
-#if 0
-    fprintf(stderr, "grammar read. ");
-    show_mem_usage();
-#endif
-
     if (worst_error == 0) {
-        if (vflag) vfp = efopen(strcat(strcpy(fn, fnpref ? fnpref : "y"), OUT_SUFFIX), "w");
-        /* compute LALR(1) states & actions */
-        comp_lalr();
-        /* generate parser */
+        if (fl_verbose) vfp = efopen(strcat(strcpy(fn, filename_prefix ? filename_prefix : "y"), OUT_SUFFIX), "w");
+        comp_lalr();        /* compute LALR(1) states & actions */
         parser_generate();
-#if 0
-        fprintf(stderr, "gentable done. ");
-        show_mem_usage();
-#endif
         if (vfp) efclose(vfp);
     }
 
