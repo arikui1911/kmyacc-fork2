@@ -13,7 +13,5 @@ extern char *filename;
 extern char *outfilename;
 extern int expected_srconf;
 extern char *pspref;
-extern FILE *efopen(char *fn, char *mode);
-extern void efclose(FILE *fp);
 
 #endif

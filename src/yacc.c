@@ -55,7 +55,7 @@ static char *progname = "kmyacc";
 
 
 /* Print usage of this program */
-void usage(const char *program_name){
+static void usage(const char *program_name){
     fprintf(stderr, "KMyacc - parser generator ver 4.1.4\n");
     fprintf(stderr, "Copyright (C) 1987-1989,1992-1993,2005,2006  MORI Koichiro\n\n");
     fprintf(stderr, "Usage: %s [-dvltani] [-b y] [-p yy] [-m model] [-L lang] [grammar.y\n", program_name);
@@ -63,7 +63,7 @@ void usage(const char *program_name){
 
 
 /* Open file fn with mode; exit if fail */
-global FILE *efopen(char *fn, char *mode){
+static FILE *efopen(char *fn, char *mode){
     FILE *fp;
 
     if (strcmp(fn, "-") == 0) {
@@ -83,7 +83,7 @@ global FILE *efopen(char *fn, char *mode){
 }
 
 /* Close file fp and exit if error */
-global void efclose(FILE *fp){
+static void efclose(FILE *fp){
     if (ferror(fp) || fclose(fp)) {
         fprintf(stderr, "%s: can't close\n", progname);
         exit(1);
