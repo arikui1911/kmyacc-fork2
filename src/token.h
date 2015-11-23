@@ -28,6 +28,18 @@ int   gettoken(void);
 void  ungettok(void);
 int   peektoken(void);
 
+char *token_intern(char *);
+int   token_get_raw(void);
+int   token_get(void);
+void  token_unget(void);
+int   token_peek(void);
 char *token_get_current_text();
+
+/* temporary alternatives */
+#define intern_token    token_intern
+#define raw_gettoken    token_get_raw
+#define gettoken        token_get
+#define ungettok        token_unget
+#define peektoken       token_peek
 
 #endif

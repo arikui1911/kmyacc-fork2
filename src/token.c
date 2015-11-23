@@ -22,7 +22,7 @@
 
 
 #ifndef global
-/* return values of function gettoken */
+/* return values of function token_get */
 #define	NAME		'a'
 #define	NUMBER		'0'
 #define SPACE		' '
@@ -94,7 +94,7 @@ static unsigned hash(char *p){
 
 
 /* Intern token s */
-global char *intern_token(char *s){
+global char *token_intern(char *s){
     Thash *p, **root;
 
     root = hashtbl + (hash(s) % NHASHROOT);
@@ -115,7 +115,7 @@ global char *intern_token(char *s){
 
 #define iswhite(c) ((c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\v' || (c) == '\f')
 
-/* gettokened text */
+/* token_get changing text and type */
 static char *token_text;
 static int token_type;
 
@@ -132,7 +132,7 @@ private char *back_token_text;
  * return: token type
  * global: token_text Interned token text body
  */
-global int raw_gettoken(){
+global int token_get_raw(){
     int c, tag;
     char *p;
     static char token_buff[MAXTOKEN + 4];
@@ -250,7 +250,7 @@ global int raw_gettoken(){
     }
     *p++ = '\0';
 
-    token_text = intern_token(token_buff);
+    token_text = token_intern(token_buff);
 
     if (token_buff[0] == '%') {
         /* check keyword */
@@ -291,26 +291,26 @@ global int raw_gettoken(){
     return 0;
 }
 
-global int gettoken(){
-    int c = raw_gettoken();
+global int token_get(){
+    int c = token_get_raw();
     while (c == SPACE || c == COMMENT || c == NEWLINE) {
-        c = raw_gettoken();
+        c = token_get_raw();
     }
     return c;
 }
 
-global void ungettok(){
-    if (back_token_text) die("too many ungettok");
+global void token_unget(){
+    if (back_token_text) die("too many token_unget");
     back_token_type = token_type;
     back_token_text = token_text;
 }
 
 /* Peek next token */
-global int peektoken(){
+global int token_peek(){
     int save_token_type = token_type;
     char *save_token_text = token_text;
-    int tok = gettoken();
-    ungettok();
+    int tok = token_get();
+    token_unget();
     token_text = save_token_text;
     token_type = save_token_type;
     return tok;
