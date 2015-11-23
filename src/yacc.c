@@ -185,12 +185,14 @@ static int parse_options(int argc, char *argv[], Options *o){
             case 'L':
                 arg = &argv[i][j+1];
                 arg_requirer = argv[i][j];
-                break;
+                goto END_SCAN_SHORT_OPTIONS;
             default:
                 fprintf(stderr, "%s: error: invalid argument `-%c'\n", argv[0], argv[i][j]);
                 return -1;
             }
         }
+    END_SCAN_SHORT_OPTIONS:
+        ;
     }
     if (arg) {
         fprintf(stderr, "%s: error: option `-%c' missing argument\n", argv[0], arg_requirer);
@@ -211,51 +213,52 @@ static int parse_options(int argc, char *argv[], Options *o){
 /* Entry point */
 int main(int argc, char *argv[]){
     char fn[MAXPATHLEN];
-    char *parser_filename;
 
-    Options options;
+    Options o;
     int args_idx;
 
-    char *host_lang = NULL;
-    bool fl_verbose = NO;
-    bool fl_defines = NO;
-    char *filename_prefix = NULL;
-
-    parser_filename = getenv("KMYACCPAR");
+    o.fl_verbose = 0;
+    o.fl_defines = 0;
+    o.filename_prefix = NULL;
+    o.host_lang = NULL;
+    o.parser_filename = NULL;
+    o.parser_prefix = NULL;
+    o.parser_filename = getenv("KMYACCPAR");
 
 #ifndef MSDOS
     progname = *argv;
 #endif /* !MSDOS */
 
-    args_idx = parse_options(argc, argv, &options);
-    if (args_idx < 1 || (argc - args_idx) > 0) {
+    args_idx = parse_options(argc, argv, &o);
+    if (args_idx < 1 || (argc - args_idx) > 1) {
+        fprintf(stderr, "%s: error: wrong number of arguments\n", argv[0]);
         usage(argv[0]);
         return -1;
     }
 
     filename = argv[args_idx];
 
-    if (host_lang) {
-        parser_set_language(host_lang);
+    if (o.host_lang) {
+        parser_set_language(o.host_lang);
     } else {
         parser_set_language_by_yaccext(extension(filename));
     }
 
     ifp = efopen(filename, "r");
-    outfilename = parser_outfilename(filename_prefix, filename); 
+    outfilename = parser_outfilename(o.filename_prefix, filename); 
     ofp = efopen(outfilename, "w");
-    if (fl_defines) {
-        char *header = parser_header_filename(filename_prefix, filename);
+    if (o.fl_defines) {
+        char *header = parser_header_filename(o.filename_prefix, filename);
         if (header != NULL) hfp = efopen(header, "w");
     }
-    if (parser_filename == NULL) parser_filename = parser_modelfilename(PARSERBASE);
+    if (o.parser_filename == NULL) o.parser_filename = parser_modelfilename(PARSERBASE);
 
-    parser_create(efopen(parser_filename, "r"), parser_filename, tflag);
+    parser_create(efopen(o.parser_filename, "r"), o.parser_filename, tflag);
     do_declaration();
     do_grammar();
 
     if (worst_error == 0) {
-        if (fl_verbose) vfp = efopen(strcat(strcpy(fn, filename_prefix ? filename_prefix : "y"), OUT_SUFFIX), "w");
+        if (o.fl_verbose) vfp = efopen(strcat(strcpy(fn, o.filename_prefix ? o.filename_prefix : "y"), OUT_SUFFIX), "w");
         comp_lalr();        /* compute LALR(1) states & actions */
         parser_generate();
         if (vfp) efclose(vfp);
