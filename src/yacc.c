@@ -213,7 +213,7 @@ static int parse_options(int argc, char *argv[], Options *o){
 /* Entry point */
 int main(int argc, char *argv[]){
     char fn[MAXPATHLEN];
-
+    FILE *fp;
     Options o;
     int args_idx;
 
@@ -253,7 +253,8 @@ int main(int argc, char *argv[]){
     }
     if (o.parser_filename == NULL) o.parser_filename = parser_modelfilename(PARSERBASE);
 
-    parser_create(efopen(o.parser_filename, "r"), o.parser_filename, tflag);
+    fp = efopen(o.parser_filename, "r");
+    parser_create(fp, o.parser_filename, tflag);
     do_declaration();
     do_grammar();
 
@@ -265,6 +266,7 @@ int main(int argc, char *argv[]){
     }
 
     parser_close();
+    efclose(fp);
     efclose(ofp);
     exit(worst_error);
 }
