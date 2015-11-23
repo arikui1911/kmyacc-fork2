@@ -22,11 +22,11 @@
 #define EXPECT		0x10c
 #define PURE_PARSER	0x10d
 
-extern char *intern_token(char *s);
-extern int raw_gettoken(void);
-extern int gettoken(void);
-extern void ungettok(void);
-extern int peektoken(void);
+char *intern_token(char *s);
+int   raw_gettoken(void);
+int   gettoken(void);
+void  ungettok(void);
+int   peektoken(void);
 
 char *token_get_current_text();
 
