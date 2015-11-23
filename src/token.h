@@ -23,11 +23,11 @@
 #define PURE_PARSER	0x10d
 
 extern char *intern_token(char *s);
-extern char *token_text;
-extern int token_type;
 extern int raw_gettoken(void);
 extern int gettoken(void);
 extern void ungettok(void);
 extern int peektoken(void);
+
+char *token_get_current_text();
 
 #endif

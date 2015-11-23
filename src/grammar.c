@@ -220,9 +220,9 @@ Symbol *gettype(){
             break;
         }
         if (ct == 0) break;
-        len = strlen(token_text);
+        len = strlen(token_get_current_text());
         if (len > left) die("type too long");
-        strcpy(p, token_text);
+        strcpy(p, token_get_current_text());
         p += len;
         left -= len;
         if (t != SPACE) ps = p;
@@ -250,7 +250,7 @@ void do_token(int tag){
     type = gettype();
     t = gettoken();
     while (isgsym(t)) {
-        p = gsym[intern_gsym(token_text, YES)];
+        p = gsym[intern_gsym(token_get_current_text(), YES)];
         if (type != NULL) p->type = type;
         switch (tag) {
         case LEFT:
@@ -269,7 +269,7 @@ void do_token(int tag){
         }
         if ((t = gettoken()) == NUMBER) {
             if (p->value == -1) {
-                p->value = atoi(token_text);
+                p->value = atoi(token_get_current_text());
             } else {
                 error1("token %s already has a value", p->name);
             }
@@ -290,7 +290,7 @@ void do_type(){
     for (;;) {
         if ((t = gettoken()) == ',') continue;
         if (!isgsym(t)) break;
-        p = gsym[intern_gsym(token_text, NO)];
+        p = gsym[intern_gsym(token_get_current_text(), NO)];
         if (type != NULL) p->type = type;
     }
     ungettok();
@@ -302,7 +302,7 @@ Flexstr *get_block_body(){
     int ct;
 
     if (gettoken() != '{') die("{ expected");
-    copy_flexstr(flap, token_text);
+    copy_flexstr(flap, token_get_current_text());
     ct = 1;
     while (ct != 0) {
         switch (raw_gettoken()) {
@@ -316,7 +316,7 @@ Flexstr *get_block_body(){
             ct--;
             break;
         }
-        append_flexstr(flap, token_text);
+        append_flexstr(flap, token_get_current_text());
     }
     return flap;
 }
@@ -334,7 +334,7 @@ void do_union(){
 void do_copy(){
     parser_begin_copying();
     while (raw_gettoken() != ENDINC) {
-        parser_copy_token(token_text);
+        parser_copy_token(token_get_current_text());
     }
     parser_end_copying();
 }
@@ -373,14 +373,14 @@ global void do_declaration(){
             break;
         case EXPECT:
             if (gettoken() == NUMBER) {
-                expected_srconf = atoi(token_text);
+                expected_srconf = atoi(token_get_current_text());
             } else {
                 die("Missing number");
             }
             break;
         case START:
             gettoken();
-            start_sym = intern_gsym(token_text, NO);
+            start_sym = intern_gsym(token_get_current_text(), NO);
             break;
         case PURE_PARSER:
             pure_flag = YES;
@@ -389,7 +389,7 @@ global void do_declaration(){
             die("No grammar given");
             break;
         default:
-            die1(M_SYNTAX, token_text);
+            die1(M_SYNTAX, token_get_current_text());
             break;
         }
     }
@@ -432,23 +432,23 @@ char *copyact(Gsym *g, int n, int delm, char *attrname[]){
             type = NULL;
             v = -1;
             for (i = 0; i <= n; i++) {
-                if (gsym[g[i]]->name == token_text) {
+                if (gsym[g[i]]->name == token_get_current_text()) {
                     if (v < 0)
                         v = i;
                     else {
-                        error1("ambiguous semantic value reference: '%s'", token_text);
+                        error1("ambiguous semantic value reference: '%s'", token_get_current_text());
                         break;
                     }
                 }
             }
             if (v < 0) {
                 for (i = 0; i <= n; i++) {
-                    if (attrname[i] == token_text) {
+                    if (attrname[i] == token_get_current_text()) {
                         v = i;
                         break;
                     }
                 }
-                if (token_text == attrname[n + 1]) v = 0;
+                if (token_get_current_text() == attrname[n + 1]) v = 0;
             }
             if (v >= 0) {
                 tok = (v == 0 ? '$' : 0);
@@ -461,7 +461,7 @@ char *copyact(Gsym *g, int n, int delm, char *attrname[]){
             tok = raw_gettoken();
             if (tok == '<') {
                 if (raw_gettoken() != NAME) error("type expected");
-                type = intern(token_text);
+                type = intern(token_get_current_text());
                 if (raw_gettoken() != '>') error("missing >");
                 tok = raw_gettoken();
             }
@@ -472,13 +472,13 @@ char *copyact(Gsym *g, int n, int delm, char *attrname[]){
                 if (tok != NUMBER){
                   error("number expected");
                 } else {
-                    v = -atoi(token_text);
+                    v = -atoi(token_get_current_text());
                 }
             } else {
                 if (tok != NUMBER)
                     error("number expected");
                 else {
-                    v = atoi(token_text);
+                    v = atoi(token_get_current_text());
                     if (v > n) {
                         error("too big $N");
                         v = 1;
@@ -494,7 +494,7 @@ char *copyact(Gsym *g, int n, int delm, char *attrname[]){
             append_flexstr(flap, parser_dollar(tok, v, n, type ? type->name : NULL));
             continue;
         }
-        append_flexstr(flap, token_text);
+        append_flexstr(flap, token_get_current_text());
     }
     return flap->body;
 }
@@ -520,26 +520,26 @@ global void do_grammar(){
     while (t != MARK && t != EOF) {
         if (t == NAME) {
             if (peektoken() == '@') {
-                attrname[0] = token_text;
+                attrname[0] = token_get_current_text();
                 gettoken();
                 t = gettoken();
             } else {
                 attrname[0] = NULL;
             }
-            gbuf[0] = intern_gsym(token_text, NO);
+            gbuf[0] = intern_gsym(token_get_current_text(), NO);
             attrname[1] = NULL;
-            if (isterm(gbuf[0])) die1("Nonterminal symbol expected: '%s'", token_text);
+            if (isterm(gbuf[0])) die1("Nonterminal symbol expected: '%s'", token_get_current_text());
             if (gettoken() != ':') die("':' expected");
             if (start_sym == 0) start_sym = gbuf[0];
         } else if (t == '|') {
-            if (gbuf[0] == 0) die1(M_SYNTAX, token_text);
+            if (gbuf[0] == 0) die1(M_SYNTAX, token_get_current_text());
             attrname[1] = NULL;
         } else if (t == BEGININC) {
             do_copy();
             t = gettoken();
             continue;
         } else {
-            die1(M_SYNTAX, token_text);
+            die1(M_SYNTAX, token_get_current_text());
         }
         lastterm = 0;
         action = NULL;
@@ -561,11 +561,11 @@ global void do_grammar(){
                 action = copyact(gbuf, i - 1, '}', attrname);
             } else if (t == PRECTOK) {
                 gettoken();
-                lastterm = intern_gsym(token_text, NO);
+                lastterm = intern_gsym(token_get_current_text(), NO);
             } else if (t == NAME && peektoken() == ':') {
                 break;
             } else if (t == NAME && peektoken() == '@') {
-                attrname[i] = token_text;
+                attrname[i] = token_get_current_text();
                 gettoken();
             } else if (isgsym(t)) {
                 if (action) {
@@ -578,7 +578,7 @@ global void do_grammar(){
                     gsym[r->body[1]]->value = nprods;
                     gram[nprods++] = r;
                 }
-                gbuf[i++] = w = intern_gsym(token_text, NO);
+                gbuf[i++] = w = intern_gsym(token_get_current_text(), NO);
                 attrname[i] = NULL;
                 if (isterm(w))
                     lastterm = w;

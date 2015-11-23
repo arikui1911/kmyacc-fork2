@@ -116,8 +116,10 @@ global char *intern_token(char *s){
 #define iswhite(c) ((c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\v' || (c) == '\f')
 
 /* gettokened text */
-global char *token_text;
-global int token_type;
+static char *token_text;
+static int token_type;
+
+char *token_get_current_text(){ return token_text; }
 
 private int back_token_type;
 private char *back_token_text;
