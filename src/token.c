@@ -19,8 +19,42 @@
 #include "./token.h"
 #include "./misc.h"
 
-static int get(void);
-static void unget(int);
+
+/* Intern token strings. */
+typedef struct thash Thash;
+struct thash {
+    struct thash *next;
+    char body[1];
+};
+#define NHASHROOT 512
+Thash *hashtbl[NHASHROOT];
+
+/* Return string p's hash value */
+static unsigned hash(char *p){
+    unsigned u;
+
+    u = 0;
+    while (*p) {
+        u = u * 257 + *p++;
+    }
+    return (u);
+}
+
+/* Intern token s */
+char *token_intern(char *s){
+    Thash *p, **root;
+
+    root = hashtbl + (hash(s) % NHASHROOT);
+    for (p = *root; p != NULL; p = p->next) {
+        if (strcmp(p->body, s) == 0) return p->body;
+    }
+    p = alloc(sizeof(Thash) + strlen(s));
+    p->next = *root;
+    *root = p;
+    strcpy(p->body, s);
+    return p->body;
+}
+
 
 static bool backed;
 static int backch;
@@ -43,45 +77,6 @@ static void unget(int c){
     backed = YES;
     backch = c;
 }
-
-
-/* Intern token strings. */
-typedef struct thash Thash;
-struct thash {
-    struct thash *next;
-    char body[1];
-};
-#define NHASHROOT 512
-Thash *hashtbl[NHASHROOT];
-
-
-/* Return string p's hash value */
-static unsigned hash(char *p){
-    unsigned u;
-
-    u = 0;
-    while (*p) {
-        u = u * 257 + *p++;
-    }
-    return (u);
-}
-
-
-/* Intern token s */
-char *token_intern(char *s){
-    Thash *p, **root;
-
-    root = hashtbl + (hash(s) % NHASHROOT);
-    for (p = *root; p != NULL; p = p->next) {
-        if (strcmp(p->body, s) == 0) return p->body;
-    }
-    p = alloc(sizeof(Thash) + strlen(s));
-    p->next = *root;
-    *root = p;
-    strcpy(p->body, s);
-    return p->body;
-}
-
 
 
 /*#define issymch(c) (isdigit(c) || isalpha(c) || c == '_' || c == '.') */
