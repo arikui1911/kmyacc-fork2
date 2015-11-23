@@ -237,12 +237,12 @@ void def_semval_macro(char *);
 void set_metachar(char *);
 
 /* Initialize parser generator. */
-global void parser_create(char *fn, bool tflag){
+global void parser_create(FILE *fp, char *fn, bool tflag){
     char line[256];
     char spaces[256];
 
     parserfn = fn;
-    pfp = efopen(parserfn, "r");
+    pfp = fp;
 
     /* Read parameters. */
 

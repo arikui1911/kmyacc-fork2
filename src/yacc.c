@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
     }
     if (parser_filename == NULL) parser_filename = parser_modelfilename(PARSERBASE);
 
-    parser_create(parser_filename, tflag);
+    parser_create(efopen(parser_filename, "r"), parser_filename, tflag);
     do_declaration();
     do_grammar();
 

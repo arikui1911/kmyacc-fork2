@@ -1,5 +1,6 @@
 #ifndef _genparser_h
 #define _genparser_h
+#include <stdio.h>
 
 /* Language ID */
 #define LANG_C		0
@@ -17,7 +18,7 @@ extern void parser_set_language_by_yaccext(char *ext);
 extern char *parser_outfilename(char *pref, char *yacc_filename);
 extern char *parser_modelfilename(char *parser_base);
 extern char *parser_header_filename(char *pref, char *yacc_filename);
-extern void parser_create(char *fn, bool tflag);
+extern void parser_create(FILE *fp, char *fn, bool tflag);
 extern void parser_begin_copying(void);
 extern void parser_copy_token(char *str);
 extern void parser_end_copying(void);
