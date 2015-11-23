@@ -27,7 +27,21 @@ struct thash {
     char body[1];
 };
 #define NHASHROOT 512
-Thash *hashtbl[NHASHROOT];
+// Thash *hashtbl[NHASHROOT];
+
+typedef struct {
+    Thash *hashtbl[NHASHROOT];
+    int backed;
+    int backch;
+    char *token_text;
+    int token_type;
+    int back_token_type;
+    char *back_token_text;
+} TokenState;
+
+static TokenState st_token_state;
+
+
 
 /* Return string p's hash value */
 static unsigned hash(char *p){
@@ -94,7 +108,6 @@ static int back_token_type;
 static char *back_token_text;
 
 #define MAXTOKEN 50000
-
 
 /*
  * Return next token from input.
