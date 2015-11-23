@@ -841,8 +841,6 @@ global void parser_generate(){
             if (copy_header) fputs(buf, hfp);
         }
     }
-
-    if (hfp) efclose(hfp);
 }
 
 global void parser_close(){

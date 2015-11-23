@@ -266,6 +266,7 @@ int main(int argc, char *argv[]){
     }
 
     parser_close();
+    if (hfp) efclose(hfp);
     efclose(fp);
     efclose(ofp);
     exit(worst_error);
