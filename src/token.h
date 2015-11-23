@@ -22,8 +22,6 @@
 #define EXPECT		0x10c
 #define PURE_PARSER	0x10d
 
-extern int get(void);
-extern void unget(int c);
 extern char *intern_token(char *s);
 extern char *token_text;
 extern int token_type;

@@ -45,11 +45,13 @@
 
 #endif /* global */
 
+static int get(void);
+static void unget(int);
 
 static bool backed;
 static int backch;
 
-global int get(){
+static int get(){
     int c;
 
     if (backed) {
@@ -61,7 +63,7 @@ global int get(){
 }
 
 
-global void unget(int c){
+static void unget(int c){
     if (c == EOF) return;
     if (backed) die("too many unget");
     backed = YES;
