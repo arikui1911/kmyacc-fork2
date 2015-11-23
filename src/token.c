@@ -68,7 +68,7 @@ static unsigned hash(char *p){
 
 
 /* Intern token s */
-global char *token_intern(char *s){
+char *token_intern(char *s){
     Thash *p, **root;
 
     root = hashtbl + (hash(s) % NHASHROOT);
@@ -95,8 +95,8 @@ static int token_type;
 
 char *token_get_current_text(){ return token_text; }
 
-private int back_token_type;
-private char *back_token_text;
+static int back_token_type;
+static char *back_token_text;
 
 #define MAXTOKEN 50000
 
@@ -106,7 +106,7 @@ private char *back_token_text;
  * return: token type
  * global: token_text Interned token text body
  */
-global int token_get_raw(){
+int token_get_raw(){
     int c, tag;
     char *p;
     static char token_buff[MAXTOKEN + 4];
@@ -265,7 +265,7 @@ global int token_get_raw(){
     return 0;
 }
 
-global int token_get(){
+int token_get(){
     int c = token_get_raw();
     while (c == SPACE || c == COMMENT || c == NEWLINE) {
         c = token_get_raw();
@@ -273,14 +273,14 @@ global int token_get(){
     return c;
 }
 
-global void token_unget(){
+void token_unget(){
     if (back_token_text) die("too many token_unget");
     back_token_type = token_type;
     back_token_text = token_text;
 }
 
 /* Peek next token */
-global int token_peek(){
+int token_peek(){
     int save_token_type = token_type;
     char *save_token_text = token_text;
     int tok = token_get();
