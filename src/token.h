@@ -22,24 +22,23 @@
 #define EXPECT		0x10c
 #define PURE_PARSER	0x10d
 
-char *intern_token(char *s);
-int   raw_gettoken(void);
-int   gettoken(void);
-void  ungettok(void);
-int   peektoken(void);
+typedef struct TokenState TokenState;
 
-char *token_intern(char *);
-int   token_get_raw(void);
-int   token_get(void);
-void  token_unget(void);
-int   token_peek(void);
-char *token_get_current_text();
+TokenState *token_get_current_state(void);
+
+char *token_intern(TokenState *, char *);
+int   token_get_raw(TokenState *);
+int   token_get(TokenState *);
+void  token_unget(TokenState *);
+int   token_peek(TokenState *);
+char *token_get_current_text_func(TokenState *);
 
 /* temporary alternatives */
-#define intern_token    token_intern
-#define raw_gettoken    token_get_raw
-#define gettoken        token_get
-#define ungettok        token_unget
-#define peektoken       token_peek
+#define intern_token(s)     (token_intern(token_get_current_state(), (s)))
+#define raw_gettoken()      (token_get_raw(token_get_current_state()))
+#define gettoken()          (token_get(token_get_current_state()))
+#define ungettok()          (token_unget(token_get_current_state()))
+#define peektoken()         (token_peek(token_get_current_state()))
+#define token_get_current_text()    (token_get_current_text_func(token_get_current_state()))
 
 #endif
