@@ -20,28 +20,34 @@
 #include "./misc.h"
 
 
-/* Intern token strings. */
 typedef struct thash Thash;
-struct thash {
-    struct thash *next;
-    char body[1];
-};
+
 #define NHASHROOT 512
-// Thash *hashtbl[NHASHROOT];
+
+#define MAXTOKEN 50000
 
 typedef struct {
     Thash *hashtbl[NHASHROOT];
     int backed;
     int backch;
+    char token_buff[MAXTOKEN + 4];
     char *token_text;
     int token_type;
     int back_token_type;
     char *back_token_text;
 } TokenState;
 
-static TokenState st_token_state;
+static TokenState st_token_state_entity;
+static TokenState *st_token_state = &st_token_state_entity;
 
 
+/*** Intern table ***/
+
+/* Intern token strings. */
+struct thash {
+    struct thash *next;
+    char body[1];
+};
 
 /* Return string p's hash value */
 static unsigned hash(char *p){
@@ -58,7 +64,7 @@ static unsigned hash(char *p){
 char *token_intern(char *s){
     Thash *p, **root;
 
-    root = hashtbl + (hash(s) % NHASHROOT);
+    root = st_token_state->hashtbl + (hash(s) % NHASHROOT);
     for (p = *root; p != NULL; p = p->next) {
         if (strcmp(p->body, s) == 0) return p->body;
     }
@@ -70,44 +76,35 @@ char *token_intern(char *s){
 }
 
 
-static bool backed;
-static int backch;
+/*** buffered char reader ***/
 
 static int get(){
     int c;
 
-    if (backed) {
-        backed = NO;
-        return backch;
+    if (st_token_state->backed) {
+        st_token_state->backed = 0;
+        return st_token_state->backch;
     }
-    if ((c = getc(ifp)) == '\n') lineno++;
+    c = fgetc(ifp);
+    if (c == '\n') lineno++;
     return c;
 }
 
-
 static void unget(int c){
     if (c == EOF) return;
-    if (backed) die("too many unget");
-    backed = YES;
-    backch = c;
+    if (st_token_state->backed) die("too many unget");
+    st_token_state->backed = 1;
+    st_token_state->backch = c;
 }
 
 
-/*#define issymch(c) (isdigit(c) || isalpha(c) || c == '_' || c == '.') */
+/*** buffered token scanner ***/
+
 #define	issymch(c) (isdigit(c) || isalpha(c) || c == '_')
 
 #define iswhite(c) ((c) == ' ' || (c) == '\t' || (c) == '\r' || (c) == '\v' || (c) == '\f')
 
-/* token_get changing text and type */
-static char *token_text;
-static int token_type;
-
-char *token_get_current_text(){ return token_text; }
-
-static int back_token_type;
-static char *back_token_text;
-
-#define MAXTOKEN 50000
+char *token_get_current_text(){ return st_token_state->token_text; }
 
 /*
  * Return next token from input.
@@ -117,32 +114,31 @@ static char *back_token_text;
 int token_get_raw(){
     int c, tag;
     char *p;
-    static char token_buff[MAXTOKEN + 4];
 
-    if (back_token_text) {
-        token_type = back_token_type;
-        token_text = back_token_text;
-        back_token_type = 0;
-        back_token_text = NULL;
-        return token_type;
+    if (st_token_state->back_token_text) {
+        st_token_state->token_type = st_token_state->back_token_type;
+        st_token_state->token_text = st_token_state->back_token_text;
+        st_token_state->back_token_type = 0;
+        st_token_state->back_token_text = NULL;
+        return st_token_state->token_type;
     }
 
-    token_text = p = token_buff;
+    st_token_state->token_text = p = st_token_state->token_buff;
     c = get();
     if (iswhite(c)) {
         while (iswhite(c)) {
-            if (p >= token_buff + MAXTOKEN) goto toolong;
+            if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
             *p++ = c;
             c = get();
         }
         unget(c);
         *p = '\0';
-        return token_type = SPACE;
+        return st_token_state->token_type = SPACE;
     }
     if (c == '\n') {
         *p++ = c;
         *p = '\0';
-        return token_type = NEWLINE;
+        return st_token_state->token_type = NEWLINE;
     }
     if (c == '/') {
         if ((c = get()) == '*') {
@@ -155,31 +151,31 @@ int token_get_raw(){
                     unget(c);
                 }
                 if (c == EOF) die("missing */");
-                if (p >= token_buff + MAXTOKEN) goto toolong;
+                if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
                 *p++ = c;
             }
-            if (p >= token_buff + MAXTOKEN) goto toolong;
+            if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
             *p++ = '*';
             *p++ = '/';
             *p++ = '\0';
-            return token_type = COMMENT;
+            return st_token_state->token_type = COMMENT;
         } else if (c == '/') {
             /* skip // comment */
             *p++ = '/';
             *p++ = '/';
             do {
                 c = get();
-                if (p >= token_buff + MAXTOKEN) goto toolong;
+                if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
                 *p++ = c;
             } while (c != '\n' && c != EOF);
             *p++ = '\0';
-            return token_type = COMMENT;
+            return st_token_state->token_type = COMMENT;
         }
         unget(c);
         c = '/';
     }
 
-    if (c == EOF) return token_type = EOF;
+    if (c == EOF) return st_token_state->token_type = EOF;
 
     tag = c;
     if (c == '%') {
@@ -193,7 +189,7 @@ int token_get_raw(){
     }
     if (issymch(c)) {
         while (issymch(c)) {
-            if (p >= token_buff + MAXTOKEN) goto toolong;
+            if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
             *p++ = c;
             c = get();
         }
@@ -202,7 +198,7 @@ int token_get_raw(){
     } else if (c == '\'' || c == '"') {
         *p++ = c;
         while ((c = get()) != tag) {
-            if (p >= token_buff + MAXTOKEN) goto toolong;
+            if (p >= st_token_state->token_buff + MAXTOKEN) goto toolong;
             *p++ = c;
             if (c == EOF || c == '\n') {
                 error("missing '");
@@ -232,41 +228,41 @@ int token_get_raw(){
     }
     *p++ = '\0';
 
-    token_text = token_intern(token_buff);
+    st_token_state->token_text = token_intern(st_token_state->token_buff);
 
-    if (token_buff[0] == '%') {
+    if (st_token_state->token_buff[0] == '%') {
         /* check keyword */
-        if (strcmp(token_buff, "%%") == 0) {
+        if (strcmp(st_token_state->token_buff, "%%") == 0) {
             tag = MARK;
-        } else if (strcmp(token_buff, "%{") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%{") == 0) {
             tag = BEGININC;
-        } else if (strcmp(token_buff, "%}") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%}") == 0) {
             tag = ENDINC;
-        } else if (strcmp(token_buff, "%token") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%token") == 0) {
             tag = TOKEN;
-        } else if (strcmp(token_buff, "%term") == 0) {	/* old feature */
+        } else if (strcmp(st_token_state->token_buff, "%term") == 0) {	/* old feature */
             tag = TOKEN;
-        } else if (strcmp(token_buff, "%left") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%left") == 0) {
             tag = LEFT;
-        } else if (strcmp(token_buff, "%right") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%right") == 0) {
             tag = RIGHT;
-        } else if (strcmp(token_buff, "%nonassoc") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%nonassoc") == 0) {
             tag = NONASSOC;
-        } else if (strcmp(token_buff, "%prec") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%prec") == 0) {
             tag = PRECTOK;
-        } else if (strcmp(token_buff, "%type") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%type") == 0) {
             tag = TYPE;
-        } else if (strcmp(token_buff, "%union") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%union") == 0) {
             tag = UNION;
-        } else if (strcmp(token_buff, "%start") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%start") == 0) {
             tag = START;
-        } else if (strcmp(token_buff, "%expect") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%expect") == 0) {
             tag = EXPECT;
-        } else if (strcmp(token_buff, "%pure_parser") == 0) {
+        } else if (strcmp(st_token_state->token_buff, "%pure_parser") == 0) {
             tag = PURE_PARSER;
         }
     }
-    return token_type = tag;
+    return st_token_state->token_type = tag;
 
  toolong:
     die("Too long token");
@@ -282,18 +278,18 @@ int token_get(){
 }
 
 void token_unget(){
-    if (back_token_text) die("too many token_unget");
-    back_token_type = token_type;
-    back_token_text = token_text;
+    if (st_token_state->back_token_text) die("too many token_unget");
+    st_token_state->back_token_type = st_token_state->token_type;
+    st_token_state->back_token_text = st_token_state->token_text;
 }
 
 /* Peek next token */
 int token_peek(){
-    int save_token_type = token_type;
-    char *save_token_text = token_text;
+    int save_token_type = st_token_state->token_type;
+    char *save_token_text = st_token_state->token_text;
     int tok = token_get();
     token_unget();
-    token_text = save_token_text;
-    token_type = save_token_type;
+    st_token_state->token_text = save_token_text;
+    st_token_state->token_type = save_token_type;
     return tok;
 }
