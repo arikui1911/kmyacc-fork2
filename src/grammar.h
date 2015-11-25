@@ -32,7 +32,7 @@ typedef struct symbol {
 } Symbol;
 
 typedef struct production {
-    short link; /* next prod# which has same LHS */
+    short link; // next prod# which has same LHS
     uchar assoc;
     uchar prec;
     int pos;
