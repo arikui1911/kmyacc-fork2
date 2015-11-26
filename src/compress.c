@@ -47,26 +47,26 @@
  *   yylen: length of production
  */
 
-global short *yytranslate;
-global int yytranslatesize;
+short *yytranslate;
+int yytranslatesize;
 
-global int yyncterms;
+int yyncterms;
 
-global short *yyaction;
-global int yyactionsize;
-global short *yybase;
-global int yybasesize;
-global short *yycheck;
-global short *yydefault;
+short *yyaction;
+int yyactionsize;
+short *yybase;
+int yybasesize;
+short *yycheck;
+short *yydefault;
 
-global short *yygoto;
-global int yygotosize;
-global short *yygbase;
-global short *yygcheck;
-global short *yygdefault;
+short *yygoto;
+int yygotosize;
+short *yygbase;
+short *yygcheck;
+short *yygdefault;
 
-global short *yylhs;
-global short *yylen;
+short *yylhs;
+short *yylen;
 
 typedef struct preimage {
     int index;
@@ -82,31 +82,31 @@ typedef struct aux {
     short table[0];
 } Aux;
 
-global short *ctermindex;
+short *ctermindex;
 
-private short *default_act;
-private short *default_goto;
-private short **term_action;
-private short **class_action;
-private short **nonterm_goto;
-private short *class_of;
-private int nclasses;
+static short *default_act;
+static short *default_goto;
+static short **term_action;
+static short **class_action;
+static short **nonterm_goto;
+static short *class_of;
+static int nclasses;
 
-private short *frequency;
+static short *frequency;
 
-private Preimage **prims;
-private Preimage **primof;
-private int nprims;
+static Preimage **prims;
+static Preimage **primof;
+static int nprims;
 
-private short *class2nd;
-private int naux;
+static short *class2nd;
+static int naux;
 
 #define VACANT -32768
 
 #define isvacant(x) ((x) == VACANT)
 
 #if DEBUG
-private void printact(int act){
+static void printact(int act){
     if (isvacant(act)) {
         fprintf(vfp, "  . ");
     } else {
@@ -114,7 +114,7 @@ private void printact(int act){
     }
 }
 
-private void print_table(){
+static void print_table(){
     int i, j;
 
     fprintf(vfp, "\nTerminal action:\n");
@@ -181,7 +181,7 @@ private void print_table(){
 }
 #endif
 
-bool vacant_row(short *x, int n){
+static bool vacant_row(short *x, int n){
     int i;
     for (i = 0; i < n; i++) {
         if (!isvacant(x[i])) return NO;
@@ -189,7 +189,7 @@ bool vacant_row(short *x, int n){
     return YES;
 }
 
-bool eq_row(short *x, short *y, int n){
+static bool eq_row(short *x, short *y, int n){
     int i;
     for (i = 0; i < n; i++) {
         if (x[i] != y[i]) return NO;
@@ -198,7 +198,7 @@ bool eq_row(short *x, short *y, int n){
 }
 
 /* Best covering of classes */
-int best_covering(short table[], Preimage *prim){
+static int best_covering(short table[], Preimage *prim){
     int i, j, n, gain;
 
     for (i = 0; i < nstates; i++) {
@@ -232,7 +232,7 @@ int best_covering(short table[], Preimage *prim){
 }
 
 /* Extract common entries and shrink table size. */
-void extract_common(){
+static void extract_common(){
     int i, j, n;
 #if DEBUG
     int f;
@@ -377,14 +377,14 @@ struct trow {
 #define span(x) ((x)->maxi - (x)->mini)
 #define nhole(x) (span(x) - (x)->nent)
 
-int qcmp_order(const void *x0, const void *y0){
+static int qcmp_order(const void *x0, const void *y0){
     const struct trow *x = x0, *y = y0;
     if (x->nent != y->nent) return y->nent - x->nent;
     if (span(y) != span(x)) return (span(y) - span(x));
     return x->mini - y->mini;
 }
 
-void pack_table(short **transit, int nrows, int ncols, bool dontcare,
+static void pack_table(short **transit, int nrows, int ncols, bool dontcare,
                 bool checkrow,
                 short **out_table, int *out_tablesize, short **out_check,
                 short **out_base){
@@ -503,14 +503,14 @@ void pack_table(short **transit, int nrows, int ncols, bool dontcare,
     *out_base = base;
 }
 
-void encode_shift_reduce(short *t, int n){
+static void encode_shift_reduce(short *t, int n){
     int i;
     for (i = 0; i < n; i++) {
         if (t[i] >= nnonleafstates) t[i] = nnonleafstates + default_act[t[i]];
     }
 }
 
-void authodox_table(){
+static void authodox_table(){
     int i, j, ncterms;
     short **cterm_action;
     short *otermindex;
@@ -658,7 +658,7 @@ void authodox_table(){
     encode_shift_reduce(yygdefault, nnonts);
 }
 
-private int cmp_preimage(const Preimage *x, const Preimage *y){
+static int cmp_preimage(const Preimage *x, const Preimage *y){
     int i;
     if (x->len != y->len) return x->len - y->len;
     for (i = 0; i < x->len; i++) {
@@ -667,12 +667,12 @@ private int cmp_preimage(const Preimage *x, const Preimage *y){
     return 0;
 }
 
-private int qcmp_preimage(const void *x, const void *y){
+static int qcmp_preimage(const void *x, const void *y){
     return cmp_preimage(*(Preimage *const *)x, *(Preimage *const *)y);
 }
 
 /* Compute preimages for each state */
-void comp_preimages(){
+static void comp_preimages(){
     int i, j;
     Preimage **primv;
 
@@ -715,7 +715,7 @@ void comp_preimages(){
     }
 }
 
-private int cmp_states(int x, int y){
+static int cmp_states(int x, int y){
     int i;
     for (i = 0; i < nterms; i++) {
         if (term_action[x][i] != term_action[y][i]) {
@@ -725,20 +725,20 @@ private int cmp_states(int x, int y){
     return 0;
 }
 
-private int qcmp_states(const void *x, const void *y){
+static int qcmp_states(const void *x, const void *y){
     return cmp_states(*(const short *)x, *(const short *)y);
 }
 
-private int encode_rederr(int code){
+static int encode_rederr(int code){
     return code < 0 ? YYUNEXPECTED : code;
 }
 
 /* Convert symbol to compressed code. */
-global int convert_sym(int sym){
+int convert_sym(int sym){
     return isterm(sym) ? ctermindex[sym] : sym;
 }
 
-global void makeup_table2(){
+void makeup_table2(){
     int i, j, k;
     short *state_imagesorted;
     Reduce *p;

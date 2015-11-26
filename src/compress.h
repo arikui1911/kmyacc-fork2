@@ -3,6 +3,7 @@
 
 #define YYUNEXPECTED 32767
 #define YYDEFAULT -32766
+
 extern short *yytranslate;
 extern int yytranslatesize;
 extern int yyncterms;
@@ -20,6 +21,7 @@ extern short *yygdefault;
 extern short *yylhs;
 extern short *yylen;
 extern short *ctermindex;
+
 extern int convert_sym(int sym);
 extern void makeup_table2(void);
 
