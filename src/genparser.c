@@ -25,19 +25,6 @@
 
 #include "genparser.h"
 
-#ifndef global
-
-/* Language ID */
-#define LANG_C		0
-#define LANG_CPP	1
-#define LANG_JAVA	2
-#define LANG_PERL	3
-#define LANG_RUBY	4
-#define LANG_JS		5
-#define LANG_ML		6
-
-#endif /* global */
-
 /* Language name and extensions table. */
 typedef struct langmap {
     int id;

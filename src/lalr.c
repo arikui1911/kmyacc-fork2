@@ -18,50 +18,6 @@
 #include "misc.h"
 #include "lalr.h"
 
-
-#ifndef global
-
-#include "grammar.h"
-
-typedef Gsym *Item;
-
-typedef struct {
-    Gsym sym;
-    short num;
-} Reduce;
-
-typedef struct lr1 LR1;
-
-typedef struct conflict {
-    struct conflict *next;
-    bool shift_reduce;
-    Gsym symbol;
-    union {
-        struct {
-            struct state *shift;
-            int reduce;
-        } sr;
-        struct {
-            int reduce1;
-            int reduce2;
-        } rr;
-    } u;
-} Conflict;
-
-
-typedef struct state {
-    struct state *next;
-    int number;
-    LR1 *items;
-    struct state **shifts;
-    Reduce *reduce;
-    Conflict *conf;
-    Gsym thru;
-} State;
-
-#endif /* global */
-
-
 struct lr1 {
     struct lr1 *next;
     Gsym left;

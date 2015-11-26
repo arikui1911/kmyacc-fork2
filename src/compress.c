@@ -68,11 +68,6 @@ global short *yygdefault;
 global short *yylhs;
 global short *yylen;
 
-#ifndef global
-#define YYUNEXPECTED 32767
-#define YYDEFAULT -32766
-#endif /* global */
-
 typedef struct preimage {
     int index;
     int len;
