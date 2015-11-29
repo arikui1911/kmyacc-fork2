@@ -34,16 +34,16 @@ typedef struct langmap {
 } LANGMAP;
 
 /* Meta character */
-private char metachar = '$';
+static char metachar = '$';
 
-private char *parserfn;
-private FILE *pfp;
-private int plineno;
+static char *parserfn;
+static FILE *pfp;
+static int plineno;
 
-private bool copy_header = NO;
+static bool copy_header = NO;
 
 /** Host programming language. **/
-private LANGMAP *language;
+static LANGMAP *language;
 
 #define iswhite(c)	((c) == ' ' || (c) == '\t')
 
@@ -69,7 +69,7 @@ void proto_error(char *fmt, char *x){
 }
 
 /* Language name and extensions table. */
-private LANGMAP langmap[] = {
+static LANGMAP langmap[] = {
     { LANG_C, "c", ".c", ".y" },
     { LANG_CPP, "cpp", ".cpp", ".cpy" },
     { LANG_JAVA, "java", ".java", ".jy" },
@@ -99,12 +99,12 @@ LANGMAP *lang_byyaccext(char *yext){
 }
 
 /* Return language name string. */
-global char *get_lang_name(){
+char *get_lang_name(){
     return language->name;
 }
 
 /* Return language id. */
-global int get_lang_id(){
+int get_lang_id(){
     return language->id;
 }
 
@@ -146,14 +146,14 @@ void init_lang(){
 }
 
 /* Set host language by name. */
-global void parser_set_language(char *langname){
+void parser_set_language(char *langname){
     language = lang_byname(langname);
     if (language == NULL) die1("%s: unsupported host language", langname);
     init_lang();
 }
 
 /* Set host language infered from yacc filename. */
-global void parser_set_language_by_yaccext(char *ext){
+void parser_set_language_by_yaccext(char *ext){
     language = lang_byyaccext(ext);
     if (language == NULL) die1("%s: unknown yacc extension.", ext);
     init_lang();
@@ -162,7 +162,7 @@ global void parser_set_language_by_yaccext(char *ext){
 #define MAXPATHLEN 256
 
 /* Return output parser file name. */
-global char *parser_outfilename(char *pref, char *yacc_filename){
+char *parser_outfilename(char *pref, char *yacc_filename){
     static char fn[MAXPATHLEN];
 
     switch (get_lang_id()) {
@@ -191,7 +191,7 @@ global char *parser_outfilename(char *pref, char *yacc_filename){
 }
 
 /* Return parser model file name. */
-global char *parser_modelfilename(char *parser_base){
+char *parser_modelfilename(char *parser_base){
     static char fn[MAXPATHLEN];
 
     strcpy(fn, parser_base);
@@ -203,7 +203,7 @@ global char *parser_modelfilename(char *parser_base){
 }
 
 /* Return output parser header file name. */
-global char *parser_header_filename(char *pref, char *yacc_filename){
+char *parser_header_filename(char *pref, char *yacc_filename){
     static char fn[MAXPATHLEN];
 
     switch (get_lang_id()) {
@@ -224,7 +224,7 @@ void def_semval_macro(char *);
 void set_metachar(char *);
 
 /* Initialize parser generator. */
-global void parser_create(FILE *fp, char *fn, bool tflag){
+void parser_create(FILE *fp, char *fn, bool tflag){
     char line[256];
     char spaces[256];
 
@@ -255,15 +255,15 @@ global void parser_create(FILE *fp, char *fn, bool tflag){
     }
 }
 
-global void parser_begin_copying(){
+void parser_begin_copying(){
     print_line(lineno, filename);
 }
 
-global void parser_copy_token(char *str){
+void parser_copy_token(char *str){
     fprintf(ofp, "%s", str);
 }
 
-global void parser_end_copying(){
+void parser_end_copying(){
 }
 
 char *enough_type(short *p, int n){
@@ -297,21 +297,21 @@ void print_array(short *p, int n, char *indent){
     if (col != 0) fprintf(ofp, "\n");
 }
 
-private char *skipsp(char *s){
+static char *skipsp(char *s){
     while (iswhite(*s)) {
         s++;
     }
     return s;
 }
 
-private char *skipnosp(char *s){
+static char *skipnosp(char *s){
     while (*s && !isspace(*s)) {
         s++;
     }
     return s;
 }
 
-private char *quote(char *s){
+static char *quote(char *s){
     static char buf[128];
     char *p;
 
@@ -326,12 +326,12 @@ private char *quote(char *s){
 
 #define isidentch(c) (isalpha(c) || isdigit(c) || (c) == '_')
 
-private char *semval_lhs_untyped;
-private char *semval_lhs_typed;
-private char *semval_rhs_untyped;
-private char *semval_rhs_typed;
+static char *semval_lhs_untyped;
+static char *semval_lhs_typed;
+static char *semval_rhs_untyped;
+static char *semval_rhs_typed;
 
-private char *copy_rest_of_line(char *p){
+static char *copy_rest_of_line(char *p){
     char *s;
 
     for (s = p; *s && *s != '\n'; s++)
@@ -374,7 +374,7 @@ void set_metachar(char *p){
     metachar = *p;
 }
 
-global char *parser_dollar(int dollartype, int nth, int len, char *typename){
+char *parser_dollar(int dollartype, int nth, int len, char *typename){
     static char buf[128];
     char *mp, *dp;
 
@@ -649,7 +649,7 @@ void gen_reduce(){
 }
 
 /** Generate parser code. **/
-global void parser_generate(){
+void parser_generate(){
     char line[256];
     char buf[512];
     char *spaces;
@@ -830,6 +830,6 @@ global void parser_generate(){
     }
 }
 
-global void parser_close(){
+void parser_close(){
 }
 
