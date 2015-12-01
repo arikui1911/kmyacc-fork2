@@ -25,28 +25,28 @@ struct lr1 {
     uchar *look;
 };
 
-global int nstates;
-global int nnonleafstates;
+int nstates;
+int nnonleafstates;
 
-global State **statev;
+State **statev;
 
-private State *states;
+static State *states;
 
-private int nlooks;
-private int nacts, nacts2;
-private int nitems;
+static int nlooks;
+static int nacts, nacts2;
+static int nitems;
 
-private int nsrerr = 0;
-private int nrrerr = 0;
+static int nsrerr = 0;
+static int nrrerr = 0;
 
 #if MAXSYM > MAXPROD
-private bool visited[MAXSYM];
+static bool visited[MAXSYM];
 #else
-private bool visited[MAXPROD];
+static bool visited[MAXPROD];
 #endif
 
 /* List of states indexed by its label (thru) */
-private List *states_thru[MAXSYM + 1];
+static List *states_thru[MAXSYM + 1];
 
 /* Set-operation functions */
 #define NBITS 8 /* number of bits in a byte */
@@ -55,9 +55,9 @@ private List *states_thru[MAXSYM + 1];
 #define sbit(a, i) ((a)[(i) / NBITS] |= 1 << ((i) % NBITS))
 #define cbit(a, i) ((a)[(i) / NBITS] &= ~(1 << ((i) % NBITS)))
 
-private bool *nullable;
-private uchar (*first)[(MAXTERM + NBITS - 1) / NBITS];
-private uchar (*follow)[(MAXTERM + NBITS - 1) / NBITS];
+static bool *nullable;
+static uchar (*first)[(MAXTERM + NBITS - 1) / NBITS];
+static uchar (*follow)[(MAXTERM + NBITS - 1) / NBITS];
 
 
 /* Let set d = set d OR set s */
@@ -193,7 +193,7 @@ void comp_empty(){
 }
 
 /*    compute LALR(1) sets of items    */
-private int bytes_LA;
+static int bytes_LA;
 
 #define headitem(item) ((item)[-2] == 0)
 #define tailitem(item) ((item)[0] == 0)
@@ -208,7 +208,7 @@ bool sameset(LR1 *p, LR1 *t){
     return p == NULL || headitem(p->item);
 }
 
-private LR1 *freelist = NULL;
+static LR1 *freelist = NULL;
 
 /* Free unnecessary item objects. */
 void free_items(LR1 *list){
@@ -647,7 +647,7 @@ int cmp_by_sym(const void *x0, const void *y0){
     return (x->num - y->num);
 }
 
-private char rubout[] = "hoge";
+static char rubout[] = "hoge";
 
 #define RUBOUT ((State *)rubout)
 
@@ -837,7 +837,7 @@ void fill_reduce(){
     }
 }
 
-global void comp_lalr(){
+void comp_lalr(){
     /* precompute symbols that reach empty production */
     comp_empty();
     /* precompute first set & nullable set */

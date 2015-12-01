@@ -21,19 +21,19 @@
 #include "genparser.h"
 #include "grammar.h"
 
-global Symbol *gsym[MAXSYM + 1];
+Symbol *gsym[MAXSYM + 1];
 
-global Production *gram[MAXPROD];
-global int nprods, nterms, nnonts;
+Production *gram[MAXPROD];
+int nprods, nterms, nnonts;
 
-global int worst_error;
+int worst_error;
 
-global Gsym error_token;
+Gsym error_token;
 
-global char *union_body;
-global int union_lineno;
+char *union_body;
+int union_lineno;
 
-global bool pure_flag;
+bool pure_flag;
 
 #define HASHSIZE 256
 static Symbol *hashtbl[HASHSIZE];
@@ -188,7 +188,7 @@ Symbol *gettype(){
 }
 
 /* Return length of production p */
-global int length(Gsym *p){
+int length(Gsym *p){
     int n;
     for (n = 0; *++p; n++)
         ;
@@ -294,7 +294,7 @@ void do_copy(){
 }
 
 /* Process declaration part */
-global void do_declaration(){
+void do_declaration(){
     int t;
     int i;
     int val;
@@ -455,7 +455,7 @@ char *copyact(Gsym *g, int n, int delm, char *attrname[]){
 
 
 /* Read grammar */
-global void do_grammar(){
+void do_grammar(){
     Gsym gbuf[100], lastterm, w;
     char *attrname[100];
     Production *r;

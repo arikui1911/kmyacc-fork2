@@ -29,21 +29,21 @@ char *getenv();
 #include <string.h>
 
 
-global bool lflag;
-global bool tflag;
-global bool debug;
-global bool aflag;
-global bool nflag;
-global bool iflag;
+bool lflag;
+bool tflag;
+bool debug;
+bool aflag;
+bool nflag;
+bool iflag;
 
-global FILE *ifp, *ofp, *vfp, *hfp;
-global int lineno = 1;
-global char *filename;
-global char *outfilename;
+FILE *ifp, *ofp, *vfp, *hfp;
+int lineno = 1;
+char *filename;
+char *outfilename;
 
-global int expected_srconf;
+int expected_srconf;
 
-global char *pspref;
+char *pspref;
 
 static char *progname = "kmyacc";
 

@@ -28,7 +28,7 @@ char *malloc();
 
 
 /* Return extension of file pathname. */
-global char *extension(char *path){
+char *extension(char *path){
     char *p = NULL;
     while (*path) {
         if (*path == '.') {
@@ -42,7 +42,7 @@ global char *extension(char *path){
 }
 
 
-global void error1(char *fmt, char *x){
+void error1(char *fmt, char *x){
     char c;
 
     fprintf(stderr, "%s:%d: ", filename, lineno);
@@ -63,18 +63,18 @@ global void error1(char *fmt, char *x){
     putc('\n', stderr);
 }
 
-global void error(char *fmt){
+void error(char *fmt){
     error1(fmt, NULL);
 }
 
 /* Report error and exit */
-global void die(char *msg){
+void die(char *msg){
     error(msg);
     exit(1);
 }
 
 /* Report error and exit */
-global void die1(char *msg, char *str){
+void die1(char *msg, char *str){
     error1(msg, str);
     exit(1);
 }
@@ -82,17 +82,8 @@ global void die1(char *msg, char *str){
 
 /*** List handling ***/
 
-#ifndef global
-
-typedef struct list {
-    struct list *next;
-    void *elem;
-} List;
-
-#endif /* global */
-
 /* Return reversed list. */
-global List *nreverse(List *p){
+List *nreverse(List *p){
     List *q;
 
     q = NULL;
@@ -111,7 +102,7 @@ global List *nreverse(List *p){
  *	Donald E Knuth, "The Art of Computer Programming",
  *	Vol.3 / Sorting & Searching, pp. 165-166, Algorithm L.
  */
-global List *sortlist(List *p, int (*compar)()){
+List *sortlist(List *p, int (*compar)()){
     List xh, yh, *xp, *yp, *x, *y;
     unsigned int n, xn, yn;
 
@@ -178,18 +169,6 @@ global List *sortlist(List *p, int (*compar)()){
 
 /* Flexible Array */
 
-#ifndef global
-
-typedef struct flexstr Flexstr;
-
-struct flexstr {
-    int alloc_size;
-    int length;
-    char *body;
-};
-
-#endif /* global */
-
 void *emalloc(int size){
     void *p = malloc(size);
     if (p == NULL) die("Out of memory");
@@ -197,7 +176,7 @@ void *emalloc(int size){
 }
 
 /* Create flexible array object */
-global Flexstr *new_flexstr(int defaultsize){
+Flexstr *new_flexstr(int defaultsize){
     Flexstr *fap = emalloc(sizeof(Flexstr));
     fap->alloc_size = defaultsize;
     assert(fap->alloc_size >= 1);
@@ -209,7 +188,7 @@ global Flexstr *new_flexstr(int defaultsize){
 
 
 /* Copy string to flexible string */
-global void copy_flexstr(Flexstr *fap, char *str){
+void copy_flexstr(Flexstr *fap, char *str){
     int n = strlen(str);
     resize_flexstr(fap, n + 1);
     strcpy(fap->body, str);
@@ -218,7 +197,7 @@ global void copy_flexstr(Flexstr *fap, char *str){
 
 
 /* Append string */
-global void append_flexstr(Flexstr *fap, char *str){
+void append_flexstr(Flexstr *fap, char *str){
     int n = strlen(str);
     int size = fap->length + n + 1;
     resize_flexstr(fap, size);
@@ -228,7 +207,7 @@ global void append_flexstr(Flexstr *fap, char *str){
 
 
 /* Resize flexible array object */
-global void resize_flexstr(Flexstr *fap, int requiredsize){
+void resize_flexstr(Flexstr *fap, int requiredsize){
     int size = fap->alloc_size;
     assert(fap->alloc_size >= 1);
     while (size < requiredsize) {
@@ -255,7 +234,7 @@ static int alloc_left;
 static long size_allocated;
 
 /* Allocate persistent object */
-global void *alloc(unsigned s){
+void *alloc(unsigned s){
     char *ap;
 
     s = mem_roundup(s);
@@ -276,18 +255,18 @@ global void *alloc(unsigned s){
 }
 
 /* Allocate temporary object (freeable by release()) */
-global void *talloc(unsigned s){
+void *talloc(unsigned s){
     return alloc(s);
 }
 
 /* Release temporary object allocated by talloc() */
-global void release(){
+void release(){
 }
 
-global long bytes_allocated(){
+long bytes_allocated(){
     return size_allocated;
 }
 
-global void show_mem_usage(){
+void show_mem_usage(){
     fprintf(stderr, "(%ld)\n", size_allocated);
 }
