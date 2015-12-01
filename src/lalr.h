@@ -43,6 +43,6 @@ typedef struct state {
 extern int nstates;
 extern int nnonleafstates;
 extern State **statev;
-extern void comp_lalr(void);
+void comp_lalr(void);
 
 #endif

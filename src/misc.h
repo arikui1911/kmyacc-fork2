@@ -14,21 +14,21 @@ struct flexstr {
     char *body;
 };
 
-extern char *extension(char *path);
-extern void error1(char *fmt, char *x);
-extern void error(char *fmt);
-extern void die(char *msg);
-extern void die1(char *msg, char *str);
-extern List *nreverse(List *p);
-extern List *sortlist(List *p, int (*compar)());
-extern Flexstr *new_flexstr(int defaultsize);
-extern void copy_flexstr(Flexstr *fap, char *str);
-extern void append_flexstr(Flexstr *fap, char *str);
-extern void resize_flexstr(Flexstr *fap, int requiredsize);
-extern void *alloc(unsigned s);
-extern void *talloc(unsigned s);
-extern void release(void);
-extern long bytes_allocated(void);
-extern void show_mem_usage(void);
+char *extension(char *path);
+void error1(char *fmt, char *x);
+void error(char *fmt);
+void die(char *msg);
+void die1(char *msg, char *str);
+List *nreverse(List *p);
+List *sortlist(List *p, int (*compar)());
+Flexstr *new_flexstr(int defaultsize);
+void copy_flexstr(Flexstr *fap, char *str);
+void append_flexstr(Flexstr *fap, char *str);
+void resize_flexstr(Flexstr *fap, int requiredsize);
+void *alloc(unsigned s);
+void *talloc(unsigned s);
+void release(void);
+long bytes_allocated(void);
+void show_mem_usage(void);
 
 #endif

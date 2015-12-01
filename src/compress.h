@@ -22,7 +22,7 @@ extern short *yylhs;
 extern short *yylen;
 extern short *ctermindex;
 
-extern int convert_sym(int sym);
-extern void makeup_table2(void);
+int convert_sym(int sym);
+void makeup_table2(void);
 
 #endif

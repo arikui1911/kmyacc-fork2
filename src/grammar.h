@@ -51,8 +51,9 @@ extern Gsym error_token;
 extern char *union_body;
 extern int union_lineno;
 extern bool pure_flag;
-extern int length(Gsym *p);
-extern void do_declaration(void);
-extern void do_grammar(void);
+
+int length(Gsym *p);
+void do_declaration(void);
+void do_grammar(void);
 
 #endif
